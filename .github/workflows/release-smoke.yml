@@ -10,6 +10,8 @@ on:
         type: choice
         options:
           - canary
+          - nightly
+          - beta
           - latest
       host_port:
         description: Host port for the Docker smoke container
@@ -42,15 +44,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 9.15.4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
@@ -69,6 +71,7 @@ jobs:
           HOST_PORT="${{ inputs.host_port }}" \
           DATA_DIR="$RUNNER_TEMP/release-smoke-data" \
           PAPERCLIPAI_VERSION="${{ inputs.paperclip_version }}" \
+          SMOKE_READY_TIMEOUT_SECONDS=420 \
           SMOKE_DETACH=true \
           SMOKE_METADATA_FILE="$metadata_file" \
           ./scripts/docker-onboard-smoke.sh
@@ -103,7 +106,7 @@ jobs:
 
       - name: Upload diagnostics
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.artifact_name }}
           path: |
